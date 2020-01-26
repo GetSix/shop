@@ -1,12 +1,24 @@
 <template>
     <div class='login'>
         <h2>登录</h2>
-        用户名：
-        <el-input v-model="username" placeholder="请输入用户名"></el-input>
-        密码：
-        <el-input v-model="password" placeholder="请输入密码"></el-input>
-        <el-button type="success" @click="toHome()" round>登录</el-button>
-        <el-button type="success" @click="toReg()" round>去注册</el-button>
+        <van-field
+                v-model="username"
+                required
+                label="用户"
+                placeholder="请输入用户名"
+                :error-message="err1"
+              />
+        <br>
+         <van-field
+                v-model="password"
+                required
+                label="密码"
+                placeholder="请输入密码"
+                :error-message="err2"
+              />
+        <br>
+        <button style="margin:0 30px;" @click="toHome()" round>登录</button>
+        <button @click="toReg()" round>去注册</button>
     </div>
 </template>
 <script>
@@ -16,21 +28,30 @@ export default {
         return{
             username:'',
             password:'',
+            err1:'',
+            err2:'',
         }
     },
     methods: {
         toHome(){
-            if(this.username && this.password){
-                 axios.get(`http://jx.xuzhixiang.top/ap/api/login.php?username=${this.username}&password=${this.password}`)
+            if(this.username != '' && this.password != ''){
+                 axios.post(`http://localhost:3009/api/v1/auth/login`,{
+                    userName: this.username,
+                    password: this.password
+                 })
                 .then(res =>{
                     console.log(res);
-                    if(res.data.code == 1){
-                       localStorage.setItem('user',res.data.data.username);
-                       localStorage.setItem('id',res.data.data.id);
-                       localStorage.setItem('token',res.data.data.token);
-                    this.$router.push({name:'home'});
+                    if(res.data.code ==  "success"){
+                        localStorage.setItem('token',res.data.token);
+                        this.$router.push({name:'home'});
+                   }else{
+                       console.log(res);
                    }
                 });
+            }else if(this.username == ''){
+                this.err1 = '用户名不为空'
+            }else if(this.password == ''){
+                this.err2 = '密码不为空'
             }
         },
         toReg(){
@@ -41,12 +62,12 @@ export default {
 </script>
 <style scoped>
 .login{
-    width: 500px;
-    height: 400px;
     border: solid 1px #3434;
     margin: 0  auto;
     text-align: center;
-    margin-top: 500px;
-    padding: 0 30px;
 }
+input{
+    border: 0px;
+}
+
 </style>

@@ -1,11 +1,24 @@
 <template>
     <div class='reg'>
         <h2>注册</h2>
-        用户名：
-        <el-input v-model="user" placeholder="请输入用户名" ></el-input>
-        密码：
-        <el-input v-model="password" placeholder="请输入密码" ></el-input>
-        <el-button type="success" @click="tologin()" round>注册</el-button>
+        
+         <van-field
+                v-model="username"
+                required
+                label="用户"
+                placeholder="请输入用户名"
+                :error-message="err1"
+              />
+        <br>
+         <van-field
+                v-model="password"
+                required
+                label="密码"
+                placeholder="请输入密码"
+                :error-message="err2"
+              />
+        <br>
+        <button type="success" @click="reg()" round>注册</button>
     </div>
 </template>
 <script>
@@ -13,22 +26,35 @@ import axios from 'axios';
 export default {
     data(){
         return{
-            user:'',
+            username:'',
             password:'',
+            err1:'',
+            err2:'',
         }
     },
     methods: {
-        tologin(){
-            if(this.user && this.password){
-                axios.get(`http://jx.xuzhixiang.top/ap/api/reg.php?username=${this.user}&password=${this.password}`)
-                .then(res =>{
-                    console.log(res);
-                    if(res.data.code == 1){
-                        this.$router.push({name:'login'});
-                    }else{
-                        alert(res.data.msg);
-                    }
-                });
+        reg(){
+            let reg = /^[a-zA-Z0-9_-]{4,16}$/;
+            if(reg.test(this.username)){
+                let reg1 = /^[a-zA-Z0-9]{4,10}$/;
+                if(reg1.test(this.password)){
+                     axios.post("http://localhost:3009/api/v1/auth/reg",{
+                    userName: this.username,
+                    password: this.password,
+                    })
+                    .then(res =>{
+                        console.log(res);
+                        if(res.data.code ==  "success"){
+                            this.$router.push({name:'login'});
+                        }else{
+                             this.err1 = '用户名已存在';
+                        }
+                    });
+                }else{
+                    this.err2 = '密码不能含有非法字符，长度在4-10之间（字母，数字）组成'
+                }
+            }else{
+                this.err1 = '4到16位（字母，数字，下划线，减号）组成';
             }
         }
     },
@@ -36,21 +62,15 @@ export default {
 </script>
 <style scoped>
 .reg{
-    width: 400px;
-    height: 400px;
+    height: 100%;
     border: solid 1px #3434;
     margin: 0  auto;
     text-align: center;
-    margin-top: 500px;
-    padding: 0 30px;
+}
+input{
+    border: 0px;
 }
 span{
-    color:green;
-}
-el-input{
-    display: inline-block;
-}
-el-button{
-    margin-top: 30px;
+    color: green;
 }
 </style>
