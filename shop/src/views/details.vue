@@ -29,8 +29,8 @@
     </section>
     <van-goods-action>
     <van-goods-action-icon icon="chat-o" text="客服"  />
-    <van-goods-action-icon icon="cart-o" text="购物车" @click="onClickIcon" />
-    <van-goods-action-button type="warning" text="加入购物车" @click="onClickButton" />
+    <van-goods-action-icon icon="cart-o" text="购物车" @click="toCart()" />
+    <van-goods-action-button type="warning" text="加入购物车" @click="addCart(id)" />
     </van-goods-action>
 </div>
 </template>
@@ -39,7 +39,7 @@ import axios from 'axios';
 export default {
     data(){
         return{
-            collection_id:'',
+            id:'',
             name:'',
             desc:'',
             price:'',
@@ -55,7 +55,6 @@ export default {
         console.log(res.data);
         //当前商品id
         this.id = res.data._id;
-        this.collection_id = res.data._id;
         // 当前商品名称
         this.name = res.data.name;
         // 当前商品描述
@@ -74,18 +73,30 @@ export default {
     onClickLeft() {
       history.back();
     },
-    onClickIcon() {
-      this.$toast('点击图标');
+    toCart() {
+      this.$router.push({name:'cart'});
     },
-    onClickButton() {
-      this.$toast('加入购物车成功');
-      axios.post('http://localhost:3009/api/v1/shop_carts',{
-          headers: {
-                authorization: "Bearer " + localStorage.getItem("token")
-            },
-        
-      })
-    }
+     addCart(id) {
+      let num = 1;
+      console.log(id);
+      axios
+        .post(
+          "http://localhost:3009/api/v1/shop_carts",
+          {
+            product: id,
+            quantity: num
+          },
+          {
+            headers: {
+              authorization: " Bearer " + localStorage.getItem("token")
+            }
+          }
+        )
+        .then(res => {
+          console.log(res);
+           this.$toast(res.data.message);
+        });
+    },
     }
 }
 </script>
