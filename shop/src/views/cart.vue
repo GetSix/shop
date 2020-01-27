@@ -59,6 +59,12 @@ export default {
         return{
             show:false,
             cart:[],
+            totalNum: 0,
+            totalPrice: 0,
+            goodsList: [],
+            isSel: [],
+            checked: false,
+            allChecked: false
         }
     },
     methods: {
@@ -85,7 +91,173 @@ export default {
                     this.cart = res.data;
                 }
             })
+        },
+    subOne(item, index) {
+      this.cart[index].quantity--;
+      this.allPrice(item, index);
+      // this.allNum(item, index);
+      if (this.cart[index].quantity == 0) {
+        Dialog.confirm({
+          message: "是否删除该商品"
+        })
+          .then(() => {
+            // on confirm
+            axios
+              .delete(
+                "http://localhost:3009/api/v1/shop_carts/" + item._id,
+                {
+                  headers: {
+                    authorization: "Bearer " + localStorage.getItem("token")
+                  }
+                }
+              )
+              .then(res => {
+                Toast.success("删除成功");
+                this.cart.splice(index, 1);
+                this.allPrice(item, index);
+                this.allNum(item, index);
+                this.guessYouLike();
+                this.goodsLength();
+              });
+          })
+          .catch(() => {
+            item.quantity = 1;
+            this.allPrice(item, index);
+            this.allNum(item, index);
+          });
+      } else {
+        axios
+          .post(
+            "http://localhost:3009/api/v1/shop_carts",
+            {
+              product: item.product._id,
+              quantity: -1
+            },
+            {
+              headers: {
+                authorization: "Bearer " + localStorage.getItem("token")
+              }
+            }
+            // headers: { authorization: "Bearer " + localStorage.getItem("token") }
+          )
+          .then(res => {
+            // this.showCarts();
+            this.allNum(item, index);
+          });
+      }
+    },
+    addOne(item, index) {
+      this.cartsList[index].quantity++;
+      this.allPrice(item, index);
+      this.allNum(item, index);
+      // this.cartsList[index].quantity
+      axios
+        .post(
+          "http://localhost:3009/api/v1/shop_carts",
+          {
+            product: item.product._id,
+            quantity: 1,
+            isSel: true
+          },
+          {
+            headers: {
+              authorization: "Bearer " + localStorage.getItem("token")
+            }
+          }
+
+          // headers: { authorization: "Bearer " + localStorage.getItem("token") }
+        )
+        .then(res => {
+          // this.showCarts();
+        });
+    },
+    checkAll() {
+      this.allChecked = !this.allChecked;
+      this.cart.forEach(item => {
+        item.isSel = this.allChecked;
+      });
+
+      this.totalPrice = 0;
+      this.cart.forEach(item => {
+        if (this.allChecked) {
+          this.totalPrice += item.product.price * item.quantity;
         }
+      });
+      this.totalPrice = parseInt(this.totalPrice * 100) / 100;
+      if (this.allChecked) {
+        // this.totalNum = this.cartsList.length;
+        // this.allNum();
+        this.totalNum = 0;
+        this.cartsList.forEach(item => {
+          this.totalNum += item.quantity;
+        });
+      } else {
+        this.totalNum = 0;
+      }
+    },
+    checkSel(item, index) {
+      this.cart[index].isSel = !item.isSel;
+      if (this.cart.every(item => item.isSel == true)) {
+        this.allChecked = true;
+      } else {
+        this.allChecked = false;
+      }
+      this.allPrice(item, index);
+      this.allNum(item, index);
+    },
+    allPrice(item, index) {
+      this.totalPrice = 0;
+      this.cart.forEach(item => {
+        if (item.isSel) {
+          this.totalPrice += item.product.price * item.quantity;
+          // this.totalPrice = Math.round(this.totalPrice * 100) / 100;
+        }
+      });
+      this.totalPrice = parseInt(this.totalPrice * 100) / 100;
+    },
+    allNum(item, index) {
+      this.totalNum = 0;
+      this.cart.forEach(itemnum => {
+        if (itemnum.isSel == true) {
+          this.totalNum += parseInt(itemnum.quantity);
+        }
+      });
+    },
+    delCarts() {
+      let saveList = [];
+      let delList = [];
+      Dialog.confirm({
+        message: "是否删除该商品"
+      })
+        .then(() => {
+          // on confirm
+          this.cart.forEach(delitem => {
+            if (delitem.isSel == true) {
+              axios
+                .delete(
+                  "http://localhost:3009/api/v1/shop_carts/" + delitem._id,
+                  {
+                    headers: {
+                      authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                  }
+                )
+                .then(res => {
+                  this.showCarts();
+                  this.totalPrice = 0;
+                  this.totalNum = 0;
+                  this.allChecked = false;
+                  this.goodsLength();
+                });
+            }
+          });
+          this.goodsLength();
+          Toast.success("删除成功");
+        })
+        .catch(() => {
+          Toast.success("已取消");
+        });
+    },
     },
 }
 </script>
@@ -184,5 +356,6 @@ export default {
   border-radius: 30px;
   line-height: 40px;
   color: #f5f5f5;
+  text-align: center;
 }
 </style>
