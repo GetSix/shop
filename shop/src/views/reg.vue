@@ -1,7 +1,7 @@
 <template>
     <div class='reg'>
         <h2>注册</h2>
-        
+         <van-uploader :max-count="1" v-model="imgUrl" :after-read="loadImgEnd" />
          <van-field
                 v-model="username"
                 required
@@ -30,9 +30,31 @@ export default {
             password:'',
             err1:'',
             err2:'',
+            avatar:'',
+            imgUrl: []
         }
     },
     methods: {
+         loadImgEnd(file) {
+      console.log(file);
+      const formData = new FormData();
+      formData.append("file", file.file);
+      axios
+        .post(
+          "http://localhost:3009/api/v1/common/file_upload",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data" // 设置请求头传递二进制文件
+            }
+          }
+        )
+        .then(res => {
+          this.avatar = res.data.info;
+          console.log(res);
+          localStorage.setItem('avatar',res.data.info);
+        });
+    },
         reg(){
             let reg = /^[a-zA-Z0-9_-]{4,16}$/;
             if(reg.test(this.username)){
@@ -41,6 +63,7 @@ export default {
                      axios.post("http://localhost:3009/api/v1/auth/reg",{
                     userName: this.username,
                     password: this.password,
+                    avatar: this.avatar
                     })
                     .then(res =>{
                         console.log(res);

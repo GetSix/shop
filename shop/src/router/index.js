@@ -25,6 +25,10 @@ const routes = [
       path: '/user',
       name: 'user',
       component: () => import('../views/user.vue')
+    },{
+      path:'/me',
+      name:'me',
+      component: () => import('../views/me.vue')
     }]
   },{
       path: '/reg',
@@ -34,6 +38,10 @@ const routes = [
       path: '/login',
       name: 'login',
       component: () => import('../views/login.vue')
+    },{
+      path: '/details',
+      name: 'details',
+      component: () => import('../views/details.vue')
     }
 ]
 
