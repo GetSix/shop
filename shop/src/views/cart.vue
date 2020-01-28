@@ -1,227 +1,142 @@
 <template>
-    <div class='cart'>
-            <div style="text-align:center;" v-if="show">
-                <van-nav-bar class="top" title="购物车" />
-                <van-icon style="margin-top:40px;" size="100" name="shopping-cart-o" />
-                <p>购物车空空如也~~~</p>
-                <button style=" width: 80px; height: 30px; text-align: center; color:white;
-                 background-color: yellowgreen; border-radius: 30px; border:0px;" @click="toMain()">去逛逛</button>
-            </div>
-            <div>
-                <van-sticky>
-                <van-nav-bar class="top" title="购物车" right-text="删除" @click-right="delCarts" />
-                </van-sticky>
-                <div class="cartslist">
-                <div class="goodcart" v-for="(item,index) in cart" :key="index">
-                    <div class="img">
-                    <van-checkbox
-                        class="sincheckbox"
-                        @click="checkSel(item,index)"
-                        v-model="item.isSel"
-                        checked-color="#07c160"
-                    />
-                    <img :src="item.product.coverImg" alt />
-                    </div>
-                    <div class="handle">
-                    <p class="goodsname">{{item.product.name}}</p>
-                    <div class="price">
-                        <span>￥{{item.product.price}}</span>
-                        <div class="add">
-                        <div @click="subOne(item,index)">-</div>
-                        <div class="num">{{ item.quantity }}</div>
-                        <div @click="addOne(item,index)">+</div>
-                        </div>
-                    </div>
-                    </div>
-                </div>
-                </div>
-                </div>
-                <div class="pay">
-                <div class="allSel">
-                    <!-- <input type="checkbox" v-model="allChecked" value="111" /> -->
-                    <van-checkbox @click="checkAll()" v-model="allChecked" checked-color="#07c160">全选</van-checkbox>
-                </div>
-                <div class="payele">
-                    <div class="total">合计:{{totalPrice}}</div>
-                    <div class="payend" @click="toAccounts()">结算({{ totalNum }})</div>
-                </div>
-                </div>
+  <div class="cart">
+    <van-sticky>
+      <van-nav-bar class="top" title="我的购物车" right-text="删除" @click-right="delCarts" />
+    </van-sticky>
+    <div v-if="noCartShow" class="noCart">
+        <van-icon size="100" name="shopping-cart-o" />
+      <p>购物车空空如也</p>
+      <div class="goShopBtn">
+        <van-button @click="toShop" style="font-size:20px;" type="primary" size="large" round>去逛逛</van-button>
+      </div>
     </div>
+    <div class="cartslist">
+      <div class="goodcart" v-for="(item,index) in cartsList" :key="index">
+        <div class="img">
+          <!-- <input
+            class="selcheckbox"
+            type="checkbox"
+            v-model="item.isSel"
+            @click="checkSel(item,index)"
+          />-->
+          <van-checkbox
+            class="sincheckbox"
+            @click="checkSel(item,index)"
+            v-model="item.isSel"
+            checked-color="#07c160"
+          />
+          <img :src="item.product.coverImg" alt />
+        </div>
+        <div class="handle">
+          <p class="goodsname">{{item.product.name}}</p>
+          <div class="price">
+            <span>￥{{item.product.price}}</span>
+            <div class="add">
+              <div @click="subOne(item,index)">-</div>
+              <div class="num">{{ item.quantity }}</div>
+              <div @click="addOne(item,index)">+</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pay">
+      <div class="allSel">
+        <!-- <input type="checkbox" v-model="allChecked" value="111" /> -->
+        <van-checkbox @click="checkAll()" v-model="allChecked" checked-color="#07c160">全选</van-checkbox>
+      </div>
+      <div class="payele">
+        <div class="total">合计:{{totalPrice}}</div>
+        <div class="payend" @click="toAccounts()">结算({{ totalNum }})</div>
+      </div>
+    </div>
+
+    <!-- 猜你喜欢 -->
+    <van-divider :style="{ color: '#1989fa', borderColor: '#1989fa', padding: '0 16px' }">猜你喜欢</van-divider>
+    <div class="goods" v-if="!noCartShow">
+      <van-grid :gutter="10" :column-num="2">
+        <van-grid-item v-for="(item,index) in goodsList" :key="index">
+          <div @click="toDetail(item)">
+            <div class="goodimg">
+              <img :src="item.coverImg" alt />
+            </div>
+            <div class="goodname">{{ item.name }}</div>
+            <div class="gooddes">{{ item.descriptions }}</div>
+          </div>
+          <div class="addcart">
+            <span style="color:red;">￥{{ item.price }}</span>
+            <div class="shoppingcart" @click="addCart(item)">
+              <van-icon size="30" color="#FFFFFF" name="cart-circle-o" />
+            </div>
+          </div>
+        </van-grid-item>
+      </van-grid>
+    </div>
+  </div>
 </template>
+
 <script>
-import axios from 'axios';
+import Vue from "vue";
+import { Dialog } from "vant";
+import { Toast } from "vant";
+Vue.use(Toast);
+// 全局注册
+Vue.use(Dialog);
+import axios from "axios";
 export default {
-    created() {
-        this.isLogin();
-        this.showCart();
+  name: "cart",
+  components: {},
+  data() {
+    return {
+      totalNum: 0,
+      totalPrice: 0,
+      noCartShow: false,
+      cartsList: [],
+      goodsList: [],
+      isSel: [],
+      checked: false,
+      allChecked: false
+    };
+  },
+  created() {
+    if (localStorage.getItem("token")) {
+      this.showgoods();
+      this.showCarts();
+    }
+    this.isLogin();
+  },
+  methods: {
+    toShop() {
+      this.$router.push({
+        name: "main"
+      });
     },
-    data(){
-        return{
-            show:false,
-            cart:[],
-            totalNum: 0,
-            totalPrice: 0,
-            goodsList: [],
-            isSel: [],
-            checked: false,
-            allChecked: false
-        }
-    },
-    methods: {
-        isLogin() {
-        if (localStorage.getItem("token")) {
-        } else {
-            this.$router.push({ name: "login" });
-        }
-        },
-        toMain(){
-            this.$router.push({name:'main'})
-        },
-        showCart(){
-            axios.get('http://localhost:3009/api/v1/shop_carts',{
-            headers: {
-                authorization: "Bearer " + localStorage.getItem("token")
-            }})
-            .then(res =>{
-                console.log(res.data);
-                if(res.data.length == 0){
-                    console.log(111)
-                    this.show = true;
-                }else{
-                    this.cart = res.data;
-                }
-            })
-        },
-    subOne(item, index) {
-      this.cart[index].quantity--;
-      this.allPrice(item, index);
-      // this.allNum(item, index);
-      if (this.cart[index].quantity == 0) {
-        Dialog.confirm({
-          message: "是否删除该商品"
-        })
-          .then(() => {
-            // on confirm
-            axios
-              .delete(
-                "http://localhost:3009/api/v1/shop_carts/" + item._id,
-                {
-                  headers: {
-                    authorization: "Bearer " + localStorage.getItem("token")
-                  }
-                }
-              )
-              .then(res => {
-                Toast.success("删除成功");
-                this.cart.splice(index, 1);
-                this.allPrice(item, index);
-                this.allNum(item, index);
-                this.guessYouLike();
-                this.goodsLength();
-              });
-          })
-          .catch(() => {
-            item.quantity = 1;
-            this.allPrice(item, index);
-            this.allNum(item, index);
-          });
+    goodsLength() {
+      this.$store.state.num = this.cartsList.length;
+      if (this.cartsList.length == 0) {
+        this.noCartShow = true;
       } else {
-        axios
-          .post(
-            "http://localhost:3009/api/v1/shop_carts",
-            {
-              product: item.product._id,
-              quantity: -1
-            },
-            {
-              headers: {
-                authorization: "Bearer " + localStorage.getItem("token")
-              }
-            }
-            // headers: { authorization: "Bearer " + localStorage.getItem("token") }
-          )
-          .then(res => {
-            // this.showCarts();
-            this.allNum(item, index);
-          });
+        this.noCartShow = false;
       }
     },
-    addOne(item, index) {
-      this.cartsList[index].quantity++;
-      this.allPrice(item, index);
-      this.allNum(item, index);
-      // this.cartsList[index].quantity
-      axios
-        .post(
-          "http://localhost:3009/api/v1/shop_carts",
-          {
-            product: item.product._id,
-            quantity: 1,
-            isSel: true
-          },
-          {
-            headers: {
-              authorization: "Bearer " + localStorage.getItem("token")
-            }
-          }
-
-          // headers: { authorization: "Bearer " + localStorage.getItem("token") }
-        )
-        .then(res => {
-          // this.showCarts();
-        });
-    },
-    checkAll() {
-      this.allChecked = !this.allChecked;
-      this.cart.forEach(item => {
-        item.isSel = this.allChecked;
-      });
-
-      this.totalPrice = 0;
-      this.cart.forEach(item => {
-        if (this.allChecked) {
-          this.totalPrice += item.product.price * item.quantity;
+    toAccounts() {
+      //将购车的数据赋值给 this.$store.state.assountsList
+      this.$store.state.accountsList = this.cartsList;
+      this.$store.state.accountsList.find(item => {
+        //判断长度不为0 时跳转到结账页
+        if (item.isSel === true) {
+          console.log(this.cartsList);
+           this.$store.state.cartList = this.cartsList;
+            console.log(this.$store.state.cartList);
+          return this.$router.push({ name: "accounts" });
         }
       });
-      this.totalPrice = parseInt(this.totalPrice * 100) / 100;
-      if (this.allChecked) {
-        // this.totalNum = this.cartsList.length;
-        // this.allNum();
-        this.totalNum = 0;
-        this.cartsList.forEach(item => {
-          this.totalNum += item.quantity;
-        });
+    },
+    isLogin() {
+      if (localStorage.getItem("token")) {
       } else {
-        this.totalNum = 0;
+        this.$router.push({ name: "login" });
       }
-    },
-    checkSel(item, index) {
-      this.cart[index].isSel = !item.isSel;
-      if (this.cart.every(item => item.isSel == true)) {
-        this.allChecked = true;
-      } else {
-        this.allChecked = false;
-      }
-      this.allPrice(item, index);
-      this.allNum(item, index);
-    },
-    allPrice(item, index) {
-      this.totalPrice = 0;
-      this.cart.forEach(item => {
-        if (item.isSel) {
-          this.totalPrice += item.product.price * item.quantity;
-          // this.totalPrice = Math.round(this.totalPrice * 100) / 100;
-        }
-      });
-      this.totalPrice = parseInt(this.totalPrice * 100) / 100;
-    },
-    allNum(item, index) {
-      this.totalNum = 0;
-      this.cart.forEach(itemnum => {
-        if (itemnum.isSel == true) {
-          this.totalNum += parseInt(itemnum.quantity);
-        }
-      });
     },
     delCarts() {
       let saveList = [];
@@ -231,7 +146,7 @@ export default {
       })
         .then(() => {
           // on confirm
-          this.cart.forEach(delitem => {
+          this.cartsList.forEach(delitem => {
             if (delitem.isSel == true) {
               axios
                 .delete(
@@ -258,9 +173,228 @@ export default {
           Toast.success("已取消");
         });
     },
+    showCarts() {
+      axios
+        .get("http://localhost:3009/api/v1/shop_carts", {
+          headers: {
+            authorization: "Bearer " + localStorage.getItem("token")
+          }
+        })
+        .then(res => {
+          console.log(res);
+          this.cartsList = res.data;
+          this.cartsList.forEach(item => {
+            item.isSel = false;
+          });
+          this.guessYouLike();
+          this.goodsLength();
+        });
     },
-}
+    guessYouLike() {
+      let youLike = [];
+      this.cartsList.forEach(item => {
+        youLike.push(item.product.productCategory);
+      });
+      let likeGoodId = this.findMost(youLike);
+      this.showgoods(likeGoodId);
+    },
+    showgoods(id) {
+      axios
+        .get("http://localhost:3009/api/v1/products", {
+          params: {
+            product_category: id
+          }
+        })
+        .then(res => {
+          this.goodsList = res.data.products;
+        });
+    },
+    findMost(arr) {
+      if (!arr.length) return;
+      if (arr.length === 1) return arr;
+      let res = {};
+      let maxName,
+        maxNum = 0;
+      // 遍历数组
+      arr.forEach(item => {
+        res[item] ? (res[item] += 1) : (res[item] = 1);
+      });
+      // 遍历 res
+      for (let r in res) {
+        if (res[r] > maxNum) {
+          maxNum = res[r];
+          maxName = r;
+        }
+      }
+      return maxName;
+    },
+
+    addCart(gooditem) {
+      axios
+        .post(
+          "http://localhost:3009/api/v1/shop_carts",
+          { product: gooditem._id, isSel: true },
+          {
+            headers: {
+              authorization: "Bearer " + localStorage.getItem("token")
+            }
+          }
+
+          // headers: { authorization: "Bearer " + localStorage.getItem("token") }
+        )
+        .then(res => {
+          console.log(res);
+          Toast.success("加入购物车成功");
+          this.showCarts();
+        });
+    },
+    checkAll() {
+      this.allChecked = !this.allChecked;
+      this.cartsList.forEach(item => {
+        item.isSel = this.allChecked;
+      });
+
+      this.totalPrice = 0;
+      this.cartsList.forEach(item => {
+        if (this.allChecked) {
+          this.totalPrice += item.product.price * item.quantity;
+        }
+      });
+      this.totalPrice = parseInt(this.totalPrice * 100) / 100;
+      if (this.allChecked) {
+        // this.totalNum = this.cartsList.length;
+        // this.allNum();
+        this.totalNum = 0;
+        this.cartsList.forEach(item => {
+          this.totalNum += item.quantity;
+        });
+      } else {
+        this.totalNum = 0;
+      }
+    },
+    checkSel(item, index) {
+      this.cartsList[index].isSel = !item.isSel;
+      if (this.cartsList.every(item => item.isSel == true)) {
+        this.allChecked = true;
+      } else {
+        this.allChecked = false;
+      }
+      this.allPrice(item, index);
+      this.allNum(item, index);
+    },
+    addOne(item, index) {
+      this.cartsList[index].quantity++;
+      this.allPrice(item, index);
+      this.allNum(item, index);
+      // this.cartsList[index].quantity
+      axios
+        .post(
+          "http://localhost:3009/api/v1/shop_carts",
+          {
+            product: item.product._id,
+            quantity: 1,
+            isSel: true
+          },
+          {
+            headers: {
+              authorization: "Bearer " + localStorage.getItem("token")
+            }
+          }
+
+          // headers: { authorization: "Bearer " + localStorage.getItem("token") }
+        )
+        .then(res => {
+          // this.showCarts();
+        });
+    },
+
+    subOne(item, index) {
+      this.cartsList[index].quantity--;
+      this.allPrice(item, index);
+      // this.allNum(item, index);
+      if (this.cartsList[index].quantity == 0) {
+        Dialog.confirm({
+          message: "是否删除该商品"
+        })
+          .then(() => {
+            // on confirm
+            axios
+              .delete(
+                "http://localhost:3009/api/v1/shop_carts/" + item._id,
+                {
+                  headers: {
+                    authorization: "Bearer " + localStorage.getItem("token")
+                  }
+                }
+              )
+              .then(res => {
+                Toast.success("删除成功");
+                this.cartsList.splice(index, 1);
+                this.allPrice(item, index);
+                this.allNum(item, index);
+                this.guessYouLike();
+                this.goodsLength();
+              });
+          })
+          .catch(() => {
+            item.quantity = 1;
+            this.allPrice(item, index);
+            this.allNum(item, index);
+          });
+      } else {
+        axios
+          .post(
+            "http://localhost:3009/api/v1/shop_carts",
+            {
+              product: item.product._id,
+              quantity: -1
+            },
+            {
+              headers: {
+                authorization: "Bearer " + localStorage.getItem("token")
+              }
+            }
+
+            // headers: { authorization: "Bearer " + localStorage.getItem("token") }
+          )
+          .then(res => {
+            // this.showCarts();
+            this.allNum(item, index);
+          });
+      }
+    },
+
+    allPrice(item, index) {
+      this.totalPrice = 0;
+      this.cartsList.forEach(item => {
+        if (item.isSel) {
+          this.totalPrice += item.product.price * item.quantity;
+          // this.totalPrice = Math.round(this.totalPrice * 100) / 100;
+        }
+      });
+      this.totalPrice = parseInt(this.totalPrice * 100) / 100;
+    },
+    allNum(item, index) {
+      this.totalNum = 0;
+      this.cartsList.forEach(itemnum => {
+        if (itemnum.isSel == true) {
+          this.totalNum += parseInt(itemnum.quantity);
+        }
+      });
+    },
+    toDetail(xq) {
+      this.$router.push({
+        name: "details",
+        query: {
+          _id: xq._id
+        }
+      });
+      localStorage.setItem("id", xq._id);
+    }
+  }
+};
 </script>
+
 <style scoped>
 .cart {
   width: 100%;
@@ -269,6 +403,13 @@ export default {
   display: flex;
   flex-direction: column;
   padding-bottom: 100px;
+  z-index: -10;
+}
+.noCart{
+    text-align: center;
+}
+.num{
+    text-align: center;
 }
 .cartslist {
   flex: 1;
@@ -281,14 +422,14 @@ export default {
   display: flex;
   margin-top: 10px;
 }
-.cart .goodcart .sincheckbox {
-  margin-left: 10px;
-}
-.cart .goodcart .goodsname{
+.goodsname{
     width: 200px;
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.cart .goodcart .sincheckbox {
+  margin-left: 10px;
 }
 .cart .goodcart .img {
   width: 40%;
@@ -326,7 +467,6 @@ export default {
 .cart .goodcart .handle .price .add .num {
   background: #f5f5f5;
   width: 30px;
-  text-align: center;
 }
 .cart .pay {
   height: 60px;
@@ -357,5 +497,47 @@ export default {
   line-height: 40px;
   color: #f5f5f5;
   text-align: center;
+}
+.goods {
+  position: relative;
+}
+.goods .goodimg {
+  width: 100%;
+}
+.goods .goodimg img {
+  width: 100%;
+}
+.goods .addcart {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.goods .addcart .shoppingcart {
+  width: 30px;
+  height: 30px;
+  line-height: 40px;
+  color: #f5f5f5;
+  background: rgb(154, 245, 112);
+  border-radius: 50%;
+}
+.goodname {
+  font-size: 14px;
+  text-align: left;
+  margin-bottom: 10px;
+}
+.gooddes {
+  font-size: 12px;
+  color: #808883;
+  text-align: left;
+  line-height: 20px;
+}
+.selcheckbox {
+  border-radius: 50%;
+}
+.goShopBtn {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 40px;
 }
 </style>

@@ -86,7 +86,6 @@ export default {
 <style scoped>
 .reg{
     height: 100%;
-    border: solid 1px #3434;
     margin: 0  auto;
     text-align: center;
 }
@@ -95,5 +94,14 @@ input{
 }
 span{
     color: green;
+}
+button{
+    background-color: cornflowerblue;
+    border: 0px;
+    color: white;
+    width: 100px;
+    height: 40px;
+    border-radius: 30px;
+    margin: 0 30px;
 }
 </style>

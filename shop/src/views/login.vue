@@ -17,7 +17,7 @@
                 :error-message="err2"
               />
         <br>
-        <button style="margin:0 30px;" @click="toHome()" round>登录</button>
+        <button @click="toHome()" round>登录</button>
         <button @click="toReg()" round>去注册</button>
     </div>
 </template>
@@ -62,12 +62,20 @@ export default {
 </script>
 <style scoped>
 .login{
-    border: solid 1px #3434;
     margin: 0  auto;
     text-align: center;
 }
 input{
     border: 0px;
+}
+button{
+    background-color: cornflowerblue;
+    border: 0px;
+    color: white;
+    width: 100px;
+    height: 40px;
+    border-radius: 30px;
+    margin: 0 30px;
 }
 
 </style>

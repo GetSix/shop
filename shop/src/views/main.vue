@@ -19,15 +19,18 @@
         <van-grid :gutter="10" :column-num="2">
         <van-grid-item
             v-for="(item , index) in list"
-            :key="index"
-            @click="todetail(item._id)">
-            <img :src="item.coverImg" alt />
+            :key="index">
+            <div class="top" @click="todetail(item._id)">
+              <img class="cover" :src="item.coverImg" alt />
             <p class="tit">{{item.name}}</p>
             <p class="desc">{{item.descriptions}}</p>
             <div class="price-warp">
               <span class="price">¥{{ item.price }}</span>
-              <span class="originPrice">¥{{ item.price }}</span>
-              <van-icon style="margin-left: 30px; " color="#3bba63" size="30" name="cart-circle-o" />
+              <span class="price2">¥{{ item.price }}</span>
+            </div>
+            </div>
+            <div class="shoppingcart" @click="addCart(item)">
+              <van-icon size="30" color="#FFFFFF" name="cart-circle-o" />
             </div>
         </van-grid-item>
         </van-grid>
@@ -60,6 +63,25 @@ export default {
         this.$router.push({ name: "login" });
       }
     },
+    addCart(gooditem) {
+      axios
+        .post(
+          "http://localhost:3009/api/v1/shop_carts",
+          { product: gooditem._id, isSel: true },
+          {
+            headers: {
+              authorization: "Bearer " + localStorage.getItem("token")
+            }
+          }
+
+          // headers: { authorization: "Bearer " + localStorage.getItem("token") }
+        )
+        .then(res => {
+          console.log(res);
+          this.$toast("加入购物车成功");
+          this.showCarts();
+        });
+    },
     loadData(){
         axios.get('http://localhost:3009/api/v1/products',{
             params: {
@@ -91,18 +113,24 @@ export default {
 .van-grid-item {
   font-size: 14px;
 }
-.van-grid-item img {
+.van-grid-item .cover{
   width: 100px;
   height: 120px;
-  margin: 15px 0px;
+
 }
  .tit {
-  margin: 0px;
-  width: 116px;
-  height: 42px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  font-size: 14px;
+  text-align: left;
+  margin-bottom: 10px;
+}
+.top{
+  text-align: center;
+}
+.desc{
+  font-size: 12px;
+  color: #808883;
+  text-align: left;
+  line-height: 20px;
 }
 .price {
   margin: 0px;
@@ -118,5 +146,13 @@ export default {
   font-size: 14px;
   color: #999;
   text-decoration: line-through;
+}
+.shoppingcart {
+  width: 30px;
+  height: 30px;
+  line-height: 40px;
+  color: #f5f5f5;
+  background: rgb(154, 245, 112);
+  border-radius: 50%;
 }
 </style>
