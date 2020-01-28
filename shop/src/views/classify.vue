@@ -5,7 +5,7 @@
     </header>
     <div class="main">
       <van-sidebar v-model="activeKey">
-        <router-link :to="{name:item.name,query:{}}" :key="item._id" v-for="item in category">
+         <router-link :to="{name:item.name,query:{}}" :key="item._id" v-for="item in category">
           <van-sidebar-item :title="item.name" @click="to(item._id,item.name)" />
         </router-link>
       </van-sidebar>
@@ -40,6 +40,7 @@ export default {
   },
   methods: {
     to(id, cname) {
+      console.log(id,cname);
       localStorage.setItem("cname", cname);
     },
     fromHome() {

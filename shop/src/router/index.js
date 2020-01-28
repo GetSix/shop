@@ -16,7 +16,42 @@ const routes = [
     },{
       path: '/classify',
       name: 'classify',
-      component: () => import('../views/classify.vue')
+       //重定向
+       redirect: '/classify/lenove',
+      component: () => import('../views/classify.vue'),
+      children: [{
+        path:'/classify/mi',
+        name:'小米',
+        component: () => import('../views/sort/mi.vue')
+      },{
+        path:'/classify/huawei',
+        name:'华为',
+        component: () => import('../views/sort/huawei.vue')
+      },{
+        path:'/classify/iphone',
+        name:'苹果',
+        component: () => import('../views/sort/iphone.vue')
+      },{
+        path:'/classify/lenove',
+        name:'联想',
+        component: () => import('../views/sort/lenove.vue')
+      },{
+        path:'/classify/oneplus',
+        name:'一加',
+        component: () => import('../views/sort/oneplus.vue')
+      },{
+        path:'/classify/oppo',
+        name:'oppo',
+        component: () => import('../views/sort/oppo.vue')
+      },{
+        path:'/classify/sanxing',
+        name:'三星',
+        component: () => import('../views/sort/sanxing.vue')
+      },{
+        path:'/classify/vivo',
+        name:'vivo',
+        component: () => import('../views/sort/vivo.vue')
+      }]
     },{
       path: '/cart',
       name: 'cart',
@@ -29,10 +64,6 @@ const routes = [
       path:'/me',
       name:'me',
       component: () => import('../views/me.vue')
-    },{
-      path:'/mi',
-      name:'mi',
-      component: () => import('../views/sort/mi.vue')
     }]
   },{
       path: '/reg',
