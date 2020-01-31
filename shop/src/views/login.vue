@@ -43,7 +43,7 @@ export default {
                     console.log(res);
                     if(res.data.code ==  "success"){
                         localStorage.setItem('token',res.data.token);
-                        this.$router.push({name:'home'});
+                        this.$router.push({name:'main'});
                    }else{
                        console.log(res);
                    }

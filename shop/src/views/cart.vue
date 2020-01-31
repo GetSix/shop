@@ -54,23 +54,24 @@
     <!-- 猜你喜欢 -->
     <van-divider :style="{ color: '#1989fa', borderColor: '#1989fa', padding: '0 16px' }">猜你喜欢</van-divider>
     <div class="goods" v-if="!noCartShow">
-      <van-grid :gutter="10" :column-num="2">
-        <van-grid-item v-for="(item,index) in goodsList" :key="index">
-          <div @click="toDetail(item)">
-            <div class="goodimg">
-              <img :src="item.coverImg" alt />
+        <van-grid :gutter="10" :column-num="2">
+        <van-grid-item
+            v-for="(item , index) in goodsList"
+            :key="index">
+            <div class="top" @click="todetail(item._id)">
+              <img class="cover" :src="item.coverImg" alt />
+            <p class="tit">{{item.name}}</p>
+            <p class="desc">{{item.descriptions}}</p>
+            <div class="price-warp">
+              <span class="price">¥{{ item.price }}</span>
+              <span class="price2">¥{{ item.price }}</span>
             </div>
-            <div class="goodname">{{ item.name }}</div>
-            <div class="gooddes">{{ item.descriptions }}</div>
-          </div>
-          <div class="addcart">
-            <span style="color:red;">￥{{ item.price }}</span>
+            </div>
             <div class="shoppingcart" @click="addCart(item)">
               <van-icon size="30" color="#FFFFFF" name="cart-circle-o" />
             </div>
-          </div>
         </van-grid-item>
-      </van-grid>
+        </van-grid>
     </div>
   </div>
 </template>
@@ -501,43 +502,53 @@ export default {
 .goods {
   position: relative;
 }
-.goods .goodimg {
-  width: 100%;
+.van-grid{
+    margin-top: 15px;
+    margin-bottom: 55px;
 }
-.goods .goodimg img {
-  width: 100%;
+.van-grid-item {
+  font-size: 14px;
 }
-.goods .addcart {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.van-grid-item .cover{
+  width: 100px;
+  height: 120px;
+
 }
-.goods .addcart .shoppingcart {
+ .tit {
+  font-size: 14px;
+  text-align: left;
+  margin-bottom: 10px;
+}
+.top{
+  text-align: center;
+}
+.desc{
+  font-size: 12px;
+  color: #808883;
+  text-align: left;
+  line-height: 20px;
+}
+.price {
+  margin: 0px;
+  width: 80px;
+  height: 18px;
+  font-size: 18px;
+  color: #f37078;
+  display: inline-block;
+}
+.price2 {
+  margin: 0px;
+  width: 80px;
+  font-size: 14px;
+  color: #999;
+  text-decoration: line-through;
+}
+.shoppingcart {
   width: 30px;
   height: 30px;
   line-height: 40px;
   color: #f5f5f5;
   background: rgb(154, 245, 112);
   border-radius: 50%;
-}
-.goodname {
-  font-size: 14px;
-  text-align: left;
-  margin-bottom: 10px;
-}
-.gooddes {
-  font-size: 12px;
-  color: #808883;
-  text-align: left;
-  line-height: 20px;
-}
-.selcheckbox {
-  border-radius: 50%;
-}
-.goShopBtn {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0 40px;
 }
 </style>

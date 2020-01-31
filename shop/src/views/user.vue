@@ -11,10 +11,25 @@
     	</div>
     	<div class="base-info">
             <p v-if="!user" @click="toLogin()">去登录</p>
-    		<p v-if="user" @click="toMe()">{{username}}</p>
+    		<p v-if="user" @click="toMe()">{{username}}
+                <van-icon style="float: right;
+                right:20px;" name="arrow" />
+            </p>
     	</div>
         </div>
-        
+        <div>
+            <div class="base-info" @click="toMyOrder()">
+            <p style="display: inline-block;">我的订单</p>
+                <van-icon style="float: right;
+                right:20px; margin-top:12px;" name="arrow" />
+    	    </div>
+            <van-grid>
+            <van-grid-item :to="{name:'myOrder',query:{activeName:'全部'}}" icon="label-o" text="全部" />
+            <van-grid-item :to="{name:'myOrder',query:{activeName:'待支付'}}" icon="cart-circle-o" text="待支付" />
+            <van-grid-item :to="{name:'myOrder',query:{activeName:'待收货'}}" icon="point-gift" text="待收货" />
+            <van-grid-item :to="{name:'myOrder',query:{activeName:'待评价'}}" icon="smile-comment" text="待评价" />
+            </van-grid>
+        </div>
     </div>
 </template>
 <script>
@@ -35,6 +50,7 @@ export default {
         }
     },
     methods: {
+
         toLogin(){
             this.$router.push({name:'login'});
         },
@@ -51,8 +67,11 @@ export default {
           console.log(res);
           this.username =  res.data.userName;
       })
-    }
     },
+    toMyOrder(){
+        this.$router.push({name:'myOrder'});
+    }  
+      },
 }
 </script>
 <style scoped>
@@ -75,6 +94,7 @@ export default {
     }
 .base-info{
   		margin-left: 5%;
-  		line-height: 20px;
+          line-height: 20px;
+          width: 100%;
       }
 </style>
