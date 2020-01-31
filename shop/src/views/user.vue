@@ -9,6 +9,7 @@
                 src="https://img.yzcdn.cn/vant/cat.jpeg"
                 />
     	</div>
+
     	<div class="base-info">
             <p v-if="!user" @click="toLogin()">去登录</p>
     		<p v-if="user" @click="toMe()">{{username}}
@@ -18,17 +19,17 @@
     	</div>
         </div>
         <div>
-            <div class="base-info" @click="toMyOrder()">
-            <p style="display: inline-block;">我的订单</p>
-                <van-icon style="float: right;
-                right:20px; margin-top:12px;" name="arrow" />
-    	    </div>
+            <van-cell icon="label-o"  @click="toMyOrder()" title="我的订单" is-link />
             <van-grid>
             <van-grid-item :to="{name:'myOrder',query:{activeName:'全部'}}" icon="label-o" text="全部" />
             <van-grid-item :to="{name:'myOrder',query:{activeName:'待支付'}}" icon="cart-circle-o" text="待支付" />
             <van-grid-item :to="{name:'myOrder',query:{activeName:'待收货'}}" icon="point-gift" text="待收货" />
             <van-grid-item :to="{name:'myOrder',query:{activeName:'待评价'}}" icon="smile-comment" text="待评价" />
             </van-grid>
+            <van-cell icon="refund-o"  title="我的优惠券" is-link />
+            <van-cell icon="location-o"  title="我的收货地址" is-link />
+            <van-cell icon="points"  title="我的积分" is-link />
+            <van-cell icon="point-gift"  title="我收到的礼物" is-link />
         </div>
     </div>
 </template>
